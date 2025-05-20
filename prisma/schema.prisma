@@ -8,35 +8,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model dizimistas {
-  id                   String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  usuario_id           String?   @db.Uuid
-  qtd_dizimos          Int?      @default(0)
-  qtd_dizimos_seguidos Int?      @default(0)
-  devolveu_dizimo_mes  Boolean?  @default(false)
-  atualizado_em        DateTime? @default(now()) @db.Timestamp(6)
-  usuarios             usuarios? @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  dizimos              dizimos[]
-}
-
-model dizimos {
-  id              String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  dizimista_id    String?     @db.Uuid
-  valor           Decimal?    @db.Decimal(10, 2)
-  data_pagamento  DateTime?   @default(now()) @db.Date
-  forma_pagamento String?
-  observacoes     String?
-  dizimistas      dizimistas? @relation(fields: [dizimista_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-}
-
-model funcionarios {
-  id            String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  usuario_id    String?   @db.Uuid
-  cargo         String
-  contratado_em DateTime? @default(now()) @db.Date
-  usuarios      usuarios? @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-}
-
 model usuarios {
   id              String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   nome            String
@@ -51,6 +22,39 @@ model usuarios {
   eh_funcionario  Boolean?       @default(false)
   pastoral        String?
   criado_em       DateTime?      @default(now()) @db.Timestamp(6)
-  dizimistas      dizimistas[]
-  funcionarios    funcionarios[]
+
+  dizimista       dizimistas?
+  funcionario     funcionarios?
+}
+
+model dizimistas {
+  id                   String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  usuario_id           String     @unique @db.Uuid
+  qtd_dizimos          Int?       @default(0)
+  qtd_dizimos_seguidos Int?       @default(0)
+  devolveu_dizimo_mes  Boolean?   @default(false)
+  atualizado_em        DateTime?  @default(now()) @db.Timestamp(6)
+
+  usuario              usuarios   @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  dizimos              dizimos[]
+}
+
+model funcionarios {
+  id            String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  usuario_id    String     @unique @db.Uuid
+  cargo         String
+  contratado_em DateTime?  @default(now()) @db.Date
+
+  usuario       usuarios   @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model dizimos {
+  id              String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  dizimista_id    String?     @db.Uuid
+  valor           Decimal?    @db.Decimal(10, 2)
+  data_pagamento  DateTime?   @default(now()) @db.Date
+  forma_pagamento String?
+  observacoes     String?
+
+  dizimista       dizimistas? @relation(fields: [dizimista_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
